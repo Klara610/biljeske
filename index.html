@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="hr">
+<html lang="hr" manifest="biljeske.appcache">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -720,6 +720,13 @@
   setupCanvas();
   setColor('#ff5fa2');
   updateSizeDot();
+
+  /* offline: service worker za novije uređaje (stari iPad koristi appcache manifest) */
+  try {
+    if ('serviceWorker' in navigator && location.protocol === 'https:'){
+      navigator.serviceWorker.register('sw.js');
+    }
+  } catch(e){}
 
   window.addEventListener('resize', function(){
     var old = canvas.toDataURL('image/png');
