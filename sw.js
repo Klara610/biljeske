@@ -1,4 +1,4 @@
-var CACHE = 'biljeske-v1';
+var CACHE = 'biljeske-v2';
 
 self.addEventListener('install', function(e){
   e.waitUntil(
