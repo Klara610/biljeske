@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>🎀 Obične Bilješke 🎀</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { height:100%; overflow:hidden; }
+  body {
+    font-family:"Chalkboard SE","Comic Sans MS","Segoe UI",cursive,sans-serif;
+    background:#ffd6e7;
+    background-image:radial-gradient(#ffb6d5 12%, transparent 13%);
+    background-size:26px 26px;
+    display:-webkit-flex; display:flex;
+    -webkit-flex-direction:column; flex-direction:column;
+    color:#a14d78;
+  }
+
+  /* ---------- header ---------- */
+  #header {
+    background:#ffb6d5;
+    border-bottom:4px dotted #ff8fc0;
+    padding:6px 10px;
+    display:-webkit-flex; display:flex;
+    -webkit-align-items:center; align-items:center;
+    -webkit-flex-wrap:wrap; flex-wrap:wrap;
+  }
+  #logo { font-size:20px; font-weight:bold; color:#d6337f; margin-right:10px; white-space:nowrap; }
+  #noteTitle {
+    -webkit-flex:1; flex:1;
+    min-width:120px;
+    border:3px solid #ff8fc0; border-radius:16px;
+    padding:6px 12px; font-size:15px;
+    background:#fff0f6; color:#a14d78;
+    font-family:inherit; outline:none; margin-right:8px;
+  }
+  .hbtn {
+    border:0; border-radius:16px;
+    background:#ff8fc0; color:#fff;
+    font-size:14px; font-family:inherit;
+    padding:8px 10px; margin:3px 2px;
+    box-shadow:0 3px 0 #e06ba3;
+    cursor:pointer; white-space:nowrap;
+  }
+  .hbtn:active { -webkit-transform:translateY(2px); transform:translateY(2px); box-shadow:0 1px 0 #e06ba3; }
+
+  /* ---------- toolbar ---------- */
+  #toolbar {
+    background:#ffe3ef;
+    border-bottom:3px dashed #ffb6d5;
+    padding:5px 8px;
+    display:-webkit-flex; display:flex;
+    -webkit-align-items:center; align-items:center;
+    -webkit-flex-wrap:wrap; flex-wrap:wrap;
+  }
+  .tool {
+    border:3px solid transparent; border-radius:14px;
+    background:#fff0f6; font-size:20px;
+    width:44px; height:44px; margin:2px 3px;
+    cursor:pointer;
+  }
+  .tool.active { border-color:#d6337f; background:#ffc9e0; box-shadow:0 0 8px #ff8fc0; }
+  #colorBtn {
+    width:44px; height:44px; margin:2px 6px;
+    border-radius:50%; border:3px solid #fff;
+    box-shadow:0 0 0 3px #ff8fc0;
+    cursor:pointer;
+  }
+  .swatch {
+    width:26px; height:26px; border-radius:50%;
+    border:2px solid #fff; box-shadow:0 0 0 2px #ffb6d5;
+    margin:2px 3px; cursor:pointer; display:inline-block;
+  }
+  #sizeWrap { display:-webkit-flex; display:flex; -webkit-align-items:center; align-items:center; margin:2px 8px; }
+  #sizeSlider { width:110px; margin:0 8px; }
+  #sizeDotWrap { width:36px; height:36px; display:-webkit-flex; display:flex; -webkit-align-items:center; align-items:center; -webkit-justify-content:center; justify-content:center; background:#fff0f6; border-radius:12px; border:2px solid #ffb6d5; }
+  #sizeDot { border-radius:50%; background:#d6337f; }
+  .lbl { font-size:13px; color:#c05c93; }
+
+  /* ---------- canvas ---------- */
+  #canvasWrap {
+    -webkit-flex:1; flex:1;
+    position:relative; overflow:hidden;
+    margin:10px; border-radius:22px;
+    border:4px solid #ffb6d5;
+    background:#fffafc;
+    background-image:-webkit-linear-gradient(top, #ffeaf3 1px, transparent 1px);
+    background-image:linear-gradient(#ffeaf3 1px, transparent 1px);
+    background-size:100% 34px;
+    box-shadow:0 6px 18px rgba(255,143,192,.4);
+  }
+  #pad { position:absolute; left:0; top:0; touch-action:none; -ms-touch-action:none; }
+
+  /* ---------- color panel ---------- */
+  #colorPanel {
+    display:none; position:absolute; z-index:30;
+    top:8px; left:50%; margin-left:-140px; width:280px;
+    background:#fff0f6; border:4px solid #ffb6d5; border-radius:22px;
+    padding:12px; text-align:center;
+    box-shadow:0 8px 24px rgba(214,51,127,.35);
+  }
+  #wheel { border-radius:50%; cursor:crosshair; }
+  #lightSlider { width:200px; }
+  #colorPreview { display:inline-block; width:34px; height:34px; border-radius:50%; border:3px solid #fff; box-shadow:0 0 0 2px #ff8fc0; vertical-align:middle; margin-left:10px; }
+
+  /* ---------- gallery ---------- */
+  #galleryPanel {
+    display:none; position:absolute; z-index:40;
+    left:5%; right:5%; top:6%; bottom:6%;
+    background:#fff0f6; border:4px solid #ffb6d5; border-radius:24px;
+    padding:14px; overflow:auto;
+    box-shadow:0 10px 30px rgba(214,51,127,.4);
+  }
+  #galleryPanel h2 { color:#d6337f; text-align:center; margin-bottom:10px; font-size:20px; }
+  .gitem {
+    display:inline-block; vertical-align:top;
+    width:150px; margin:8px; text-align:center;
+    background:#ffe3ef; border:3px solid #ffb6d5; border-radius:16px;
+    padding:8px; cursor:pointer;
+  }
+  .gitem img { width:130px; height:96px; background:#fff; border-radius:10px; border:2px solid #ffc9e0; }
+  .gitem .gt { font-size:13px; color:#a14d78; margin-top:4px; word-wrap:break-word; }
+  .gdel { border:0; background:#ff8fc0; color:#fff; border-radius:10px; font-size:12px; padding:3px 10px; margin-top:5px; font-family:inherit; cursor:pointer; }
+  #galleryEmpty { text-align:center; color:#c05c93; padding:30px 10px; font-size:15px; }
+
+  /* ---------- floating image bar ---------- */
+  #floatBar {
+    display:none; position:absolute; z-index:35;
+    left:50%; margin-left:-120px; bottom:18px; width:240px;
+    background:#fff0f6; border:3px solid #ffb6d5; border-radius:18px;
+    padding:6px; text-align:center;
+    box-shadow:0 6px 18px rgba(214,51,127,.35);
+  }
+  #floatBar button { border:0; border-radius:12px; background:#ff8fc0; color:#fff; font-size:18px; width:44px; height:40px; margin:2px 4px; font-family:inherit; cursor:pointer; box-shadow:0 3px 0 #e06ba3; }
+  #floatHint { font-size:11px; color:#c05c93; margin-top:2px; }
+
+  #toast {
+    display:none; position:absolute; z-index:50;
+    left:50%; top:70px; margin-left:-130px; width:260px;
+    background:#d6337f; color:#fff; border-radius:16px;
+    padding:10px; text-align:center; font-size:14px;
+    box-shadow:0 6px 18px rgba(0,0,0,.25);
+  }
+  .close-x { position:absolute; right:10px; top:8px; border:0; background:#ff8fc0; color:#fff; border-radius:50%; width:30px; height:30px; font-size:15px; cursor:pointer; font-family:inherit; }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <span id="logo">🎀 Obične Bilješke</span>
+  <input id="noteTitle" type="text" placeholder="✏️ naziv bilješke…" value="moja bilješka">
+  <button class="hbtn" id="btnNew">🌸 Nova</button>
+  <button class="hbtn" id="btnSave">💾 Spremi</button>
+  <button class="hbtn" id="btnGallery">📚 Galerija</button>
+  <button class="hbtn" id="btnFile">⬇️ Datoteka</button>
+  <button class="hbtn" id="btnOpen">📂 Otvori</button>
+  <button class="hbtn" id="btnPng">🖼️ PNG</button>
+</div>
+
+<div id="toolbar">
+  <button class="tool active" id="toolPen"    title="Olovka">✏️</button>
+  <button class="tool" id="toolMarker" title="Marker">🖍️</button>
+  <button class="tool" id="toolEraser" title="Gumica">🩹</button>
+  <button class="tool" id="toolText"   title="Tekst">🅰️</button>
+  <button class="tool" id="toolImage"  title="Slika">🖼️</button>
+  <button id="colorBtn" title="Color wheel"></button>
+  <span id="swatches"></span>
+  <span id="sizeWrap">
+    <span class="lbl">debljina</span>
+    <input id="sizeSlider" type="range" min="1" max="40" value="5">
+    <span id="sizeDotWrap"><span id="sizeDot"></span></span>
+  </span>
+  <button class="tool" id="btnUndo" title="Poništi">↩️</button>
+  <button class="tool" id="btnClear" title="Obriši sve">🗑️</button>
+</div>
+
+<div id="canvasWrap">
+  <canvas id="pad"></canvas>
+
+  <div id="colorPanel">
+    <button class="close-x" id="colorClose">✕</button>
+    <div style="font-size:16px;color:#d6337f;margin-bottom:6px;">🌈 Odaberi boju</div>
+    <canvas id="wheel" width="200" height="200"></canvas>
+    <div style="margin-top:6px;">
+      <span class="lbl">svjetlina</span><br>
+      <input id="lightSlider" type="range" min="10" max="95" value="55">
+      <span id="colorPreview"></span>
+    </div>
+  </div>
+
+  <div id="galleryPanel">
+    <button class="close-x" id="galleryClose">✕</button>
+    <h2>📚 Moja galerija bilješki 💕</h2>
+    <div id="galleryList"></div>
+  </div>
+
+  <div id="floatBar">
+    <button id="floatSmaller">－</button>
+    <button id="floatBigger">＋</button>
+    <button id="floatOk">✓</button>
+    <button id="floatCancel">✕</button>
+    <div id="floatHint">povuci prstom da pomakneš sliku 💕</div>
+  </div>
+
+  <div id="toast"></div>
+</div>
+
+<input type="file" id="fileOpen"  accept=".json,application/json,image/*" style="display:none">
+<input type="file" id="fileImage" accept="image/*" style="display:none">
+
+<script>
+(function(){
+  "use strict";
+  var canvas = document.getElementById('pad');
+  var ctx = canvas.getContext('2d');
+  var wrap = document.getElementById('canvasWrap');
+  var R = window.devicePixelRatio || 1;
+  var LW = 0, LH = 0;                 // logical size
+
+  var cur = { tool:'pen', color:'#ff5fa2', size:5, hue:330, sat:80, light:55 };
+  var drawing = false, lastX = 0, lastY = 0;
+  var undoStack = [], MAXUNDO = 20;
+  var floatImg = null, baseSnap = null;
+  var currentNoteId = null;
+  var STORE_KEY = 'kawaiiNotesV1';
+
+  /* ---------------- canvas setup ---------------- */
+  function setupCanvas(){
+    LW = wrap.clientWidth;
+    LH = wrap.clientHeight;
+    canvas.width  = LW * R;
+    canvas.height = LH * R;
+    canvas.style.width  = LW + 'px';
+    canvas.style.height = LH + 'px';
+    ctx.setTransform ? ctx.setTransform(R,0,0,R,0,0) : ctx.scale(R,R);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+  }
+
+  function toast(msg){
+    var t = document.getElementById('toast');
+    t.innerHTML = msg;
+    t.style.display = 'block';
+    setTimeout(function(){ t.style.display = 'none'; }, 1800);
+  }
+
+  /* ---------------- undo ---------------- */
+  function snapshot(){
+    try {
+      undoStack.push(canvas.toDataURL('image/png'));
+      if (undoStack.length > MAXUNDO) undoStack.shift();
+    } catch(e){}
+  }
+  function undo(){
+    if (!undoStack.length) { toast('Nema više koraka za poništiti 🥺'); return; }
+    var url = undoStack.pop();
+    var img = new Image();
+    img.onload = function(){
+      ctx.clearRect(0,0,LW,LH);
+      ctx.drawImage(img, 0, 0, LW, LH);
+    };
+    img.src = url;
+  }
+
+  /* ---------------- drawing ---------------- */
+  function getPos(e){
+    var rect = canvas.getBoundingClientRect();
+    var p = (e.touches && e.touches.length) ? e.touches[0] : e;
+    return { x: p.clientX - rect.left, y: p.clientY - rect.top };
+  }
+
+  function applyStyle(){
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.strokeStyle = cur.color;
+    ctx.lineWidth = cur.size;
+    if (cur.tool === 'marker'){
+      ctx.globalAlpha = 0.35;
+      ctx.lineWidth = cur.size * 2.2;
+    } else if (cur.tool === 'eraser'){
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.lineWidth = cur.size * 2.5;
+    }
+  }
+
+  function pointerDown(e){
+    e.preventDefault();
+    hidePanels();
+    var pos = getPos(e);
+
+    if (floatImg){ floatImg.x = pos.x; floatImg.y = pos.y; renderFloat(); return; }
+
+    if (cur.tool === 'text'){ addText(pos.x, pos.y); return; }
+    if (cur.tool === 'image'){ document.getElementById('fileImage').click(); return; }
+
+    snapshot();
+    drawing = true;
+    lastX = pos.x; lastY = pos.y;
+    applyStyle();
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+    ctx.lineTo(pos.x + 0.01, pos.y + 0.01);
+    ctx.stroke();
+  }
+
+  function pointerMove(e){
+    if (floatImg && (e.touches ? e.touches.length : e.buttons)){
+      e.preventDefault();
+      var fp = getPos(e);
+      floatImg.x = fp.x; floatImg.y = fp.y;
+      renderFloat();
+      return;
+    }
+    if (!drawing) return;
+    e.preventDefault();
+    var pos = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+    lastX = pos.x; lastY = pos.y;
+  }
+
+  function pointerUp(){
+    drawing = false;
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  canvas.addEventListener('mousedown', pointerDown, false);
+  canvas.addEventListener('mousemove', pointerMove, false);
+  window.addEventListener('mouseup', pointerUp, false);
+  canvas.addEventListener('touchstart', pointerDown, false);
+  canvas.addEventListener('touchmove', pointerMove, false);
+  canvas.addEventListener('touchend', pointerUp, false);
+
+  /* ---------------- text ---------------- */
+  function addText(x, y){
+    var txt = prompt('🅰️ Upiši tekst:');
+    if (!txt) return;
+    snapshot();
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = cur.color;
+    ctx.font = (14 + cur.size * 2) + 'px "Chalkboard SE","Comic Sans MS",cursive,sans-serif';
+    ctx.fillText(txt, x, y);
+  }
+
+  /* ---------------- floating image (insert / paste) ---------------- */
+  function startFloat(img){
+    snapshot();
+    baseSnap = canvas.toDataURL('image/png');
+    var w = Math.min(img.width, LW * 0.6);
+    var h = w * (img.height / img.width);
+    floatImg = { img: img, x: LW/2, y: LH/2, w: w, h: h };
+    document.getElementById('floatBar').style.display = 'block';
+    renderFloat();
+    toast('Povuci sliku gdje želiš pa stisni ✓');
+  }
+
+  function renderFloat(){
+    if (!floatImg) return;
+    var base = new Image();
+    base.onload = function(){
+      ctx.clearRect(0,0,LW,LH);
+      ctx.drawImage(base, 0, 0, LW, LH);
+      ctx.drawImage(floatImg.img,
+        floatImg.x - floatImg.w/2, floatImg.y - floatImg.h/2,
+        floatImg.w, floatImg.h);
+    };
+    base.src = baseSnap;
+  }
+
+  function endFloat(keep){
+    if (!floatImg) return;
+    if (!keep){
+      var base = new Image();
+      base.onload = function(){
+        ctx.clearRect(0,0,LW,LH);
+        ctx.drawImage(base, 0, 0, LW, LH);
+      };
+      base.src = baseSnap;
+      undoStack.pop();
+    }
+    floatImg = null; baseSnap = null;
+    document.getElementById('floatBar').style.display = 'none';
+  }
+
+  document.getElementById('floatOk').onclick     = function(){ endFloat(true); };
+  document.getElementById('floatCancel').onclick = function(){ endFloat(false); };
+  document.getElementById('floatBigger').onclick = function(){
+    if (!floatImg) return;
+    floatImg.w *= 1.2; floatImg.h *= 1.2; renderFloat();
+  };
+  document.getElementById('floatSmaller').onclick = function(){
+    if (!floatImg) return;
+    floatImg.w *= 0.83; floatImg.h *= 0.83; renderFloat();
+  };
+
+  function loadImageFile(file){
+    var reader = new FileReader();
+    reader.onload = function(ev){
+      var img = new Image();
+      img.onload = function(){ startFloat(img); };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  document.getElementById('fileImage').addEventListener('change', function(){
+    if (this.files && this.files[0]) loadImageFile(this.files[0]);
+    this.value = '';
+  }, false);
+
+  document.addEventListener('paste', function(e){
+    var items = (e.clipboardData || window.clipboardData || {}).items;
+    if (!items) return;
+    for (var i = 0; i < items.length; i++){
+      if (items[i].type && items[i].type.indexOf('image') === 0){
+        var f = items[i].getAsFile();
+        if (f){ loadImageFile(f); e.preventDefault(); return; }
+      }
+    }
+  }, false);
+
+  /* ---------------- tools ---------------- */
+  var toolIds = { toolPen:'pen', toolMarker:'marker', toolEraser:'eraser', toolText:'text', toolImage:'image' };
+  function selectTool(id){
+    cur.tool = toolIds[id];
+    for (var k in toolIds){
+      document.getElementById(k).className = 'tool' + (k === id ? ' active' : '');
+    }
+    if (cur.tool === 'image') document.getElementById('fileImage').click();
+  }
+  for (var tid in toolIds){
+    (function(id){
+      document.getElementById(id).onclick = function(){ selectTool(id); };
+    })(tid);
+  }
+
+  document.getElementById('btnUndo').onclick = undo;
+  document.getElementById('btnClear').onclick = function(){
+    if (confirm('Sigurno obrisati cijelu bilješku? 🥺')){
+      snapshot();
+      ctx.clearRect(0,0,LW,LH);
+    }
+  };
+
+  var sizeSlider = document.getElementById('sizeSlider');
+  function updateSizeDot(){
+    var d = Math.max(3, Math.min(30, cur.size));
+    var dot = document.getElementById('sizeDot');
+    dot.style.width = d + 'px';
+    dot.style.height = d + 'px';
+    dot.style.background = cur.color;
+  }
+  sizeSlider.onchange = sizeSlider.oninput = function(){
+    cur.size = parseInt(this.value, 10);
+    updateSizeDot();
+  };
+
+  /* ---------------- colors ---------------- */
+  function setColor(c){
+    cur.color = c;
+    document.getElementById('colorBtn').style.background = c;
+    document.getElementById('colorPreview').style.background = c;
+    updateSizeDot();
+  }
+
+  var palette = ['#ff5fa2','#ff8fc0','#ffb6d5','#d6337f','#b04a9e','#8e7cc3',
+                 '#6fa8dc','#76d7c4','#82c785','#f7dc6f','#f0a860','#e26b5d',
+                 '#8d6748','#555555','#000000','#ffffff'];
+  var swWrap = document.getElementById('swatches');
+  for (var pi = 0; pi < palette.length; pi++){
+    (function(c){
+      var s = document.createElement('span');
+      s.className = 'swatch';
+      s.style.background = c;
+      s.onclick = function(){ setColor(c); };
+      swWrap.appendChild(s);
+    })(palette[pi]);
+  }
+
+  /* color wheel */
+  var wheel = document.getElementById('wheel');
+  var wctx = wheel.getContext('2d');
+  function drawWheel(){
+    var cx = 100, cy = 100, r = 96;
+    for (var a = 0; a < 360; a++){
+      var rad1 = (a - 90) * Math.PI / 180;
+      var rad2 = (a - 88.5) * Math.PI / 180;
+      var grad = wctx.createLinearGradient(cx, cy, cx + r * Math.cos(rad1), cy + r * Math.sin(rad1));
+      grad.addColorStop(0, 'hsl(' + a + ',10%,95%)');
+      grad.addColorStop(1, 'hsl(' + a + ',100%,50%)');
+      wctx.beginPath();
+      wctx.moveTo(cx, cy);
+      wctx.arc(cx, cy, r, rad1, rad2);
+      wctx.closePath();
+      wctx.fillStyle = grad;
+      wctx.fill();
+    }
+  }
+  drawWheel();
+
+  function pickFromWheel(e){
+    var rect = wheel.getBoundingClientRect();
+    var p = (e.touches && e.touches.length) ? e.touches[0] : e;
+    var x = p.clientX - rect.left - 100;
+    var y = p.clientY - rect.top - 100;
+    var dist = Math.sqrt(x*x + y*y);
+    if (dist > 98) return;
+    var ang = Math.atan2(y, x) * 180 / Math.PI + 90;
+    if (ang < 0) ang += 360;
+    cur.hue = Math.round(ang);
+    cur.sat = Math.round(Math.min(1, dist / 96) * 100);
+    applyHsl();
+    e.preventDefault();
+  }
+  function applyHsl(){
+    setColor('hsl(' + cur.hue + ',' + cur.sat + '%,' + cur.light + '%)');
+  }
+  wheel.addEventListener('mousedown', pickFromWheel, false);
+  wheel.addEventListener('touchstart', pickFromWheel, false);
+  wheel.addEventListener('touchmove', pickFromWheel, false);
+
+  var lightSlider = document.getElementById('lightSlider');
+  lightSlider.onchange = lightSlider.oninput = function(){
+    cur.light = parseInt(this.value, 10);
+    applyHsl();
+  };
+
+  var colorPanel = document.getElementById('colorPanel');
+  document.getElementById('colorBtn').onclick = function(){
+    colorPanel.style.display = (colorPanel.style.display === 'block') ? 'none' : 'block';
+  };
+  document.getElementById('colorClose').onclick = function(){ colorPanel.style.display = 'none'; };
+
+  function hidePanels(){
+    colorPanel.style.display = 'none';
+  }
+
+  /* ---------------- gallery (localStorage) ---------------- */
+  function loadStore(){
+    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
+    catch(e){ return []; }
+  }
+  function saveStore(arr){
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(arr)); return true; }
+    catch(e){
+      alert('Nema više mjesta za spremanje 😿 Obriši neku staru bilješku iz galerije ili je spremi kao datoteku.');
+      return false;
+    }
+  }
+
+  function noteData(){
+    return {
+      id: currentNoteId || ('n' + new Date().getTime()),
+      title: document.getElementById('noteTitle').value || 'bez naziva',
+      date: new Date().toLocaleString ? new Date().toLocaleString() : String(new Date()),
+      w: LW, h: LH,
+      png: canvas.toDataURL('image/png')
+    };
+  }
+
+  document.getElementById('btnSave').onclick = function(){
+    var n = noteData();
+    var arr = loadStore();
+    var found = false;
+    for (var i = 0; i < arr.length; i++){
+      if (arr[i].id === n.id){ arr[i] = n; found = true; break; }
+    }
+    if (!found) arr.unshift(n);
+    if (saveStore(arr)){
+      currentNoteId = n.id;
+      toast('💾 Spremljeno u galeriju! ✨');
+    }
+  };
+
+  var galleryPanel = document.getElementById('galleryPanel');
+  document.getElementById('btnGallery').onclick = function(){
+    renderGallery();
+    galleryPanel.style.display = 'block';
+  };
+  document.getElementById('galleryClose').onclick = function(){ galleryPanel.style.display = 'none'; };
+
+  function renderGallery(){
+    var list = document.getElementById('galleryList');
+    var arr = loadStore();
+    list.innerHTML = '';
+    if (!arr.length){
+      list.innerHTML = '<div id="galleryEmpty">Još nema spremljenih bilješki 🌸<br>Nacrtaj nešto i stisni 💾 Spremi!</div>';
+      return;
+    }
+    for (var i = 0; i < arr.length; i++){
+      (function(n){
+        var d = document.createElement('div');
+        d.className = 'gitem';
+        var im = document.createElement('img');
+        im.src = n.png;
+        var t = document.createElement('div');
+        t.className = 'gt';
+        t.innerHTML = '💕 ' + escapeHtml(n.title) + '<br><span style="font-size:10px;color:#c99;">' + escapeHtml(n.date) + '</span>';
+        var del = document.createElement('button');
+        del.className = 'gdel';
+        del.innerHTML = '🗑️ obriši';
+        del.onclick = function(ev){
+          ev.stopPropagation();
+          if (!confirm('Obrisati "' + n.title + '"? 🥺')) return;
+          var arr2 = loadStore();
+          for (var j = 0; j < arr2.length; j++){
+            if (arr2[j].id === n.id){ arr2.splice(j,1); break; }
+          }
+          saveStore(arr2);
+          renderGallery();
+        };
+        d.appendChild(im); d.appendChild(t); d.appendChild(del);
+        d.onclick = function(){ loadNote(n); galleryPanel.style.display = 'none'; };
+        list.appendChild(d);
+      })(arr[i]);
+    }
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function loadNote(n){
+    currentNoteId = n.id || null;
+    document.getElementById('noteTitle').value = n.title || 'bilješka';
+    var img = new Image();
+    img.onload = function(){
+      undoStack = [];
+      ctx.clearRect(0,0,LW,LH);
+      var s = Math.min(LW / (n.w || img.width), LH / (n.h || img.height), 1);
+      ctx.drawImage(img, 0, 0, (n.w || img.width) * s, (n.h || img.height) * s);
+      toast('📂 Bilješka učitana! 💕');
+    };
+    img.src = n.png;
+  }
+
+  /* ---------------- file export / import ---------------- */
+  function downloadData(dataUrl, filename){
+    var a = document.createElement('a');
+    if ('download' in a){
+      a.href = dataUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } else {
+      window.open(dataUrl, '_blank');
+      toast('Drži prst na slici i odaberi "Save Image" 💕');
+    }
+  }
+
+  function safeName(){
+    var t = document.getElementById('noteTitle').value || 'biljeska';
+    return t.replace(/[^a-z0-9 _\-ćčđšž]/gi, '').replace(/ +/g, '_') || 'biljeska';
+  }
+
+  document.getElementById('btnFile').onclick = function(){
+    var n = noteData();
+    var json = JSON.stringify(n);
+    downloadData('data:application/json;charset=utf-8,' + encodeURIComponent(json), safeName() + '.json');
+    toast('⬇️ Bilješka spremljena kao datoteka!');
+  };
+
+  document.getElementById('btnPng').onclick = function(){
+    var tmp = document.createElement('canvas');
+    tmp.width = canvas.width;
+    tmp.height = canvas.height;
+    var tctx = tmp.getContext('2d');
+    tctx.fillStyle = '#fffafc';
+    tctx.fillRect(0, 0, tmp.width, tmp.height);
+    tctx.drawImage(canvas, 0, 0);
+    downloadData(tmp.toDataURL('image/png'), safeName() + '.png');
+  };
+
+  document.getElementById('btnOpen').onclick = function(){
+    document.getElementById('fileOpen').click();
+  };
+
+  document.getElementById('fileOpen').addEventListener('change', function(){
+    var f = this.files && this.files[0];
+    this.value = '';
+    if (!f) return;
+    var reader = new FileReader();
+    if (/\.json$/i.test(f.name) || f.type === 'application/json'){
+      reader.onload = function(ev){
+        try {
+          var n = JSON.parse(ev.target.result);
+          if (n && n.png) loadNote(n);
+          else alert('Ova datoteka nije bilješka 🥺');
+        } catch(e){ alert('Datoteku nije moguće pročitati 🥺'); }
+      };
+      reader.readAsText(f);
+    } else {
+      reader.onload = function(ev){
+        var img = new Image();
+        img.onload = function(){ startFloat(img); };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(f);
+    }
+  }, false);
+
+  /* ---------------- new note ---------------- */
+  document.getElementById('btnNew').onclick = function(){
+    if (!confirm('Nova bilješka? Nespremljene promjene će nestati 🌸')) return;
+    currentNoteId = null;
+    undoStack = [];
+    document.getElementById('noteTitle').value = 'moja bilješka';
+    ctx.clearRect(0,0,LW,LH);
+  };
+
+  /* ---------------- init ---------------- */
+  setupCanvas();
+  setColor('#ff5fa2');
+  updateSizeDot();
+
+  window.addEventListener('resize', function(){
+    var old = canvas.toDataURL('image/png');
+    var img = new Image();
+    img.onload = function(){
+      var ow = LW, oh = LH;
+      setupCanvas();
+      ctx.drawImage(img, 0, 0, ow, oh);
+    };
+    img.src = old;
+  }, false);
+})();
+</script>
+</body>
+</html>
