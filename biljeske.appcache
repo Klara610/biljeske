@@ -1,6 +1,7 @@
 CACHE MANIFEST
-# verzija 2 — kad se aplikacija promijeni, povećaj ovaj broj
+# verzija 3 — kad se aplikacija promijeni, povećaj ovaj broj
 index.html
+icon.png
 
 NETWORK:
 *

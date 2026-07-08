@@ -1,9 +1,9 @@
-var CACHE = 'biljeske-v2';
+var CACHE = 'biljeske-v3';
 
 self.addEventListener('install', function(e){
   e.waitUntil(
     caches.open(CACHE).then(function(c){
-      return c.addAll(['./', './index.html']);
+      return c.addAll(['./', './index.html', './icon.png']);
     })
   );
   self.skipWaiting();
